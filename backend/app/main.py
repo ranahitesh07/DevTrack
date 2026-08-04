@@ -1,6 +1,14 @@
 from fastapi import FastAPI
 
-app = FastAPI(title="DevTrack API")
+from app.api.v1.router import api_router
+
+app = FastAPI(
+    title="DevTrack API",
+    version="1.0.0",
+)
+
+app.include_router(api_router)
+
 
 @app.get("/")
 def root():
