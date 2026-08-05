@@ -43,21 +43,21 @@ def register_user(db: Session, user_data: UserCreate) -> User:
 
     return new_user
 
-def login_user(db: Session, email: str, password: str):
-    # Find user by email
+def login_user(db: Session, username: str, password: str):
+    # Find user by username
     user = (
         db.query(User)
-        .filter(User.email == email)
+        .filter(User.username == username)
         .first()
     )
 
     # User not found
     if not user:
-        raise ValueError("Invalid email or password")
+        raise ValueError("Invalid username or password")
 
     # Wrong password
     if not verify_password(password, user.hashed_password):
-        raise ValueError("Invalid email or password")
+        raise ValueError("Invalid username or password")
 
     # Create JWT token
     access_token = create_access_token(
