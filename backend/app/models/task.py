@@ -1,16 +1,16 @@
 import uuid
+from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
 
-class Project(Base):
-    __tablename__ = "projects"
+class Task(Base):
+    __tablename__ = "tasks"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -18,14 +18,14 @@ class Project(Base):
         default=uuid.uuid4,
     )
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
+    project_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("users.id"),
+        ForeignKey("projects.id"),
         nullable=False,
     )
 
     title: Mapped[str] = mapped_column(
-        String(100),
+        String(150),
         nullable=False,
     )
 
@@ -36,7 +36,17 @@ class Project(Base):
 
     status: Mapped[str] = mapped_column(
         String(20),
-        default="Active",
+        default="Todo",
+    )
+
+    priority: Mapped[str] = mapped_column(
+        String(20),
+        default="Medium",
+    )
+
+    due_date: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     created_at: Mapped[DateTime] = mapped_column(
@@ -50,13 +60,7 @@ class Project(Base):
         onupdate=func.now(),
     )
 
-    user = relationship(
-        "User",
-        back_populates="projects",
-    )
-
-    tasks = relationship(
-    "Task",
-    back_populates="project",
-    cascade="all, delete-orphan",
+    project = relationship(
+        "Project",
+        back_populates="tasks",
     )
