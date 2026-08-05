@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
@@ -8,8 +8,8 @@ from sqlalchemy.sql import func
 from app.db.database import Base
 
 
-class User(Base):
-    __tablename__ = "users"
+class Project(Base):
+    __tablename__ = "projects"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -17,27 +17,25 @@ class User(Base):
         default=uuid.uuid4,
     )
 
-    username: Mapped[str] = mapped_column(
-        String(50),
-        unique=True,
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
         nullable=False,
     )
 
-    email: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
+    title: Mapped[str] = mapped_column(
+        String(100),
         nullable=False,
     )
 
-    hashed_password: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
+    description: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
     )
 
-    is_active: Mapped[bool] = mapped_column(
-        Boolean,
-        default=True,
-        nullable=False,
+    status: Mapped[str] = mapped_column(
+        String(20),
+        default="Active",
     )
 
     created_at: Mapped[DateTime] = mapped_column(
@@ -51,8 +49,7 @@ class User(Base):
         onupdate=func.now(),
     )
 
-    projects = relationship(
-    "Project",
-    back_populates="user",
-    cascade="all, delete-orphan",
+    user = relationship(
+        "User",
+        back_populates="projects",
     )
