@@ -1,8 +1,27 @@
+import { useQuery } from "@tanstack/react-query";
 import { CheckSquare } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { getTasks } from "@/api/tasks";
+
+interface Task {
+  id: string;
+  title: string;
+  status: string;
+  priority: string;
+  due_date?: string | null;
+}
 
 export default function UpcomingTasks() {
+  const {
+    data = [],
+    isLoading,
+  } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: getTasks,
+  });
+
+  const tasks = [...data].slice(0, 5);
+
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
@@ -13,19 +32,32 @@ export default function UpcomingTasks() {
         </h2>
       </div>
 
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
-        <h3 className="text-lg font-semibold">
-          No Upcoming Tasks
-        </h3>
-
-        <p className="mt-2 max-w-xs text-sm text-slate-500">
-          Tasks with upcoming deadlines will appear here.
+      {isLoading ? (
+        <p className="text-sm text-slate-500">
+          Loading...
         </p>
+      ) : tasks.length === 0 ? (
+        <p className="text-sm text-slate-500">
+          No upcoming tasks.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {tasks.map((task: Task) => (
+            <div
+              key={task.id}
+              className="rounded-lg border p-3"
+            >
+              <p className="font-medium">
+                {task.title}
+              </p>
 
-        <Button className="mt-6 cursor-pointer">
-          Create Task
-        </Button>
-      </div>
+              <p className="text-sm text-slate-500">
+                {task.priority} • {task.status}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

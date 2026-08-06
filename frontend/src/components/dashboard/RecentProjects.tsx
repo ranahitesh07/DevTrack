@@ -1,8 +1,27 @@
+import { useQuery } from "@tanstack/react-query";
 import { FolderKanban } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import { getProjects } from "@/api/projects";
+
+interface Project {
+  id: string;
+  title: string;
+  status: string;
+}
 
 export default function RecentProjects() {
+  const {
+    data = [],
+    isLoading,
+  } = useQuery({
+    queryKey: ["projects"],
+    queryFn: getProjects,
+  });
+
+  const projects = [...data]
+    .reverse()
+    .slice(0, 5);
+
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
       <div className="mb-4 flex items-center gap-2">
@@ -13,19 +32,34 @@ export default function RecentProjects() {
         </h2>
       </div>
 
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
-        <h3 className="text-lg font-semibold">
-          No Recent Projects
-        </h3>
-
-        <p className="mt-2 max-w-xs text-sm text-slate-500">
-          Your recently created projects will appear here.
+      {isLoading ? (
+        <p className="text-sm text-slate-500">
+          Loading...
         </p>
+      ) : projects.length === 0 ? (
+        <p className="text-sm text-slate-500">
+          No recent projects.
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {projects.map(
+            (project: Project) => (
+              <div
+                key={project.id}
+                className="rounded-lg border p-3"
+              >
+                <p className="font-medium">
+                  {project.title}
+                </p>
 
-        <Button className="mt-6 cursor-pointer">
-          Create Project
-        </Button>
-      </div>
+                <p className="text-sm text-slate-500">
+                  {project.status}
+                </p>
+              </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
