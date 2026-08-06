@@ -1,5 +1,7 @@
 import { CheckSquare } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 export default function UpcomingTasks() {
   return (
     <div className="rounded-xl border bg-white p-6 shadow-sm">
@@ -11,26 +13,18 @@ export default function UpcomingTasks() {
         </h2>
       </div>
 
-      <div className="space-y-3">
-        <div className="rounded-lg border p-3">
-          <p className="font-medium">
-            Finish Dashboard UI
-          </p>
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
+        <h3 className="text-lg font-semibold">
+          No Upcoming Tasks
+        </h3>
 
-          <p className="text-sm text-slate-500">
-            Due Tomorrow
-          </p>
-        </div>
+        <p className="mt-2 max-w-xs text-sm text-slate-500">
+          Tasks with upcoming deadlines will appear here.
+        </p>
 
-        <div className="rounded-lg border p-3">
-          <p className="font-medium">
-            Build Projects Page
-          </p>
-
-          <p className="text-sm text-slate-500">
-            High Priority
-          </p>
-        </div>
+        <Button className="mt-6 cursor-pointer">
+          Create Task
+        </Button>
       </div>
     </div>
   );

@@ -4,6 +4,8 @@ import {
   CheckSquare,
   CircleCheckBig,
   Clock,
+  Activity,
+  TrendingUp,
 } from "lucide-react";
 
 import { getDashboardStats } from "@/api/dashboard";
@@ -13,7 +15,7 @@ import RecentProjects from "@/components/dashboard/RecentProjects";
 import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
 
 export default function Dashboard() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["dashboard"],
     queryFn: getDashboardStats,
   });
@@ -23,6 +25,16 @@ export default function Dashboard() {
       <div className="flex h-full items-center justify-center">
         <h2 className="text-xl font-semibold">
           Loading dashboard...
+        </h2>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <h2 className="text-xl font-semibold text-red-500">
+          Failed to load dashboard.
         </h2>
       </div>
     );
@@ -42,33 +54,47 @@ export default function Dashboard() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <StatCard
           title="Projects"
-          value={data.total_projects}
+          value={data?.total_projects ?? 0}
           icon={FolderKanban}
           color="bg-blue-600"
         />
 
         <StatCard
           title="Tasks"
-          value={data.total_tasks}
+          value={data?.total_tasks ?? 0}
           icon={CheckSquare}
           color="bg-violet-600"
         />
 
         <StatCard
           title="Completed"
-          value={data.completed_tasks}
+          value={data?.completed_tasks ?? 0}
           icon={CircleCheckBig}
           color="bg-green-600"
         />
 
         <StatCard
-          title="Pending"
-          value={data.pending_tasks}
+          title="In Progress"
+          value={data?.in_progress_tasks ?? 0}
           icon={Clock}
           color="bg-orange-500"
+        />
+
+        <StatCard
+          title="Active Projects"
+          value={data?.active_projects ?? 0}
+          icon={Activity}
+          color="bg-cyan-600"
+        />
+
+        <StatCard
+          title="Completion"
+          value={`${data?.completion_percentage ?? 0}%`}
+          icon={TrendingUp}
+          color="bg-emerald-600"
         />
       </div>
 
