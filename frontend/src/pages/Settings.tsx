@@ -1,8 +1,8 @@
-export default function Tasks() {
+export default function Settings() {
   return (
     <div>
       <h1 className="text-3xl font-bold">
-        Tasks
+        Settings
       </h1>
     </div>
   );
