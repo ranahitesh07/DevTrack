@@ -1,10 +1,22 @@
 import { useState } from "react";
+import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import type { Task } from "@/types/task";
+import PageSkeleton from "@/components/common/PageSkeleton";
 import {
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   Plus,
@@ -37,21 +49,34 @@ export default function Tasks() {
     queryFn: getTasks,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteTask,
+const deleteMutation = useMutation({
+  mutationFn: deleteTask,
 
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["tasks"],
-      });
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ["tasks"],
+    });
 
-      queryClient.invalidateQueries({
-        queryKey: ["dashboard"],
-      });
-    },
-  });
+    queryClient.invalidateQueries({
+      queryKey: ["dashboard"],
+    });
+
+    toast.success("Task deleted successfully.");
+  },
+
+  onError: () => {
+    toast.error("Failed to delete task.");
+  },
+});
 
   const [open, setOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] =
+  useState("All");
+
+  const [priorityFilter, setPriorityFilter] =
+  useState("All");
 
   const [mode, setMode] = useState<
     "create" | "edit"
@@ -59,6 +84,35 @@ export default function Tasks() {
 
   const [selectedTask, setSelectedTask] =
     useState<Task>();
+
+  const [deleteDialogOpen, setDeleteDialogOpen] =
+  useState(false);
+
+const [taskToDelete, setTaskToDelete] =
+  useState<string | null>(null);
+
+const filteredTasks = data.filter(
+  (task: Task) => {
+    const matchesSearch =
+      task.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "All" ||
+      task.status === statusFilter;
+
+    const matchesPriority =
+      priorityFilter === "All" ||
+      task.priority === priorityFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority
+    );
+  }
+);
 
   function handleCreate() {
     setMode("create");
@@ -72,23 +126,25 @@ export default function Tasks() {
     setOpen(true);
   }
 
-  function handleDelete(id: string) {
-    if (
-      !window.confirm(
-        "Are you sure you want to delete this task?"
-      )
-    ) {
-      return;
-    }
+function handleDelete(id: string) {
+  setTaskToDelete(id);
+  setDeleteDialogOpen(true);
+}
 
-    deleteMutation.mutate(id);
-  }
+function confirmDelete() {
+  if (!taskToDelete) return;
+
+  deleteMutation.mutate(taskToDelete);
+
+  setDeleteDialogOpen(false);
+  setTaskToDelete(null);
+}
 
   if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <h2 className="text-xl font-semibold">
-          Loading tasks...
+          return <PageSkeleton cards={4} />;
         </h2>
       </div>
     );
@@ -107,7 +163,6 @@ export default function Tasks() {
   return (
     <div className="space-y-8">
       {/* Header */}
-
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold">
@@ -128,29 +183,77 @@ export default function Tasks() {
         </Button>
       </div>
 
-      {/* Search */}
+{/* Search + Filters */}
+<div className="flex flex-wrap gap-4">
+  <div className="relative flex-1 min-w-[250px]">
+    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
 
-      <div className="flex gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+    <Input
+      placeholder="Search tasks..."
+      className="pl-10"
+      value={search}
+      onChange={(e) =>
+        setSearch(e.target.value)
+      }
+    />
+  </div>
 
-          <Input
-            placeholder="Search tasks..."
-            className="pl-10"
-          />
-        </div>
+  <Select
+    value={statusFilter}
+    onValueChange={setStatusFilter}
+  >
+    <SelectTrigger className="w-44">
+      <SelectValue placeholder="Status" />
+    </SelectTrigger>
 
-        <Button
-          variant="outline"
-          className="cursor-pointer"
-        >
-          <Filter className="mr-2 h-4 w-4" />
-          Filter
-        </Button>
-      </div>
+    <SelectContent>
+      <SelectItem value="All">
+        All Status
+      </SelectItem>
 
-      {/* Empty State */}
+      <SelectItem value="Todo">
+        Todo
+      </SelectItem>
 
+      <SelectItem value="In Progress">
+        In Progress
+      </SelectItem>
+
+      <SelectItem value="Completed">
+        Completed
+      </SelectItem>
+    </SelectContent>
+  </Select>
+
+  <Select
+    value={priorityFilter}
+    onValueChange={setPriorityFilter}
+  >
+    <SelectTrigger className="w-44">
+      <SelectValue placeholder="Priority" />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="All">
+        All Priority
+      </SelectItem>
+
+      <SelectItem value="High">
+        High
+      </SelectItem>
+
+      <SelectItem value="Medium">
+        Medium
+      </SelectItem>
+
+      <SelectItem value="Low">
+        Low
+      </SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+
+      {/* Content */}
       {data.length === 0 ? (
         <EmptyState
           title="No Tasks Yet"
@@ -165,12 +268,17 @@ export default function Tasks() {
             </Button>
           }
         />
+      ) : filteredTasks.length === 0 ? (
+<EmptyState
+  title="No Matching Tasks"
+  description="Try changing your search or filters."
+/>
       ) : (
         <div className="space-y-4">
-          {data.map((task: Task) => (
+          {filteredTasks.map((task: Task) => (
             <div
               key={task.id}
-              className="rounded-xl border bg-white p-5 shadow-sm"
+              className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -183,13 +291,31 @@ export default function Tasks() {
                       "No description"}
                   </p>
 
-                  <p className="mt-2 text-xs text-slate-400">
-                    Priority: {task.priority}
-                  </p>
+<div className="mt-3 flex gap-2">
+  <Badge
+    className={
+      task.priority === "High"
+        ? "bg-red-600 hover:bg-red-600"
+        : task.priority === "Medium"
+        ? "bg-yellow-500 hover:bg-yellow-500"
+        : "bg-green-600 hover:bg-green-600"
+    }
+  >
+    {task.priority}
+  </Badge>
 
-                  <p className="text-xs text-slate-400">
-                    Status: {task.status}
-                  </p>
+  <Badge
+    className={
+      task.status === "Completed"
+        ? "bg-green-600 hover:bg-green-600"
+        : task.status === "In Progress"
+        ? "bg-blue-600 hover:bg-blue-600"
+        : "bg-slate-600 hover:bg-slate-600"
+    }
+  >
+    {task.status}
+  </Badge>
+</div>
                 </div>
 
                 <div className="flex gap-2">
@@ -210,6 +336,9 @@ export default function Tasks() {
                     onClick={() =>
                       handleDelete(task.id)
                     }
+                    disabled={
+                      deleteMutation.isPending
+                    }
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
@@ -227,6 +356,15 @@ export default function Tasks() {
         mode={mode}
         task={selectedTask}
       />
+
+      <ConfirmDialog
+  open={deleteDialogOpen}
+  onOpenChange={setDeleteDialogOpen}
+  title="Delete Task"
+  description="This action cannot be undone. This will permanently delete the task."
+  onConfirm={confirmDelete}
+/>
+
     </div>
   );
 }

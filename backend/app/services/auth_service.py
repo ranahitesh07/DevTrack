@@ -7,6 +7,9 @@ from app.core.security import (
     verify_password,
     create_access_token,
 )
+from app.schemas.settings import (
+    UpdateProfile,
+)
 
 
 def register_user(db: Session, user_data: UserCreate) -> User:
@@ -67,4 +70,70 @@ def login_user(db: Session, username: str, password: str):
     return {
         "access_token": access_token,
         "token_type": "bearer",
+    }
+
+def update_profile(
+    db: Session,
+    user: User,
+    data: UpdateProfile,
+):
+    existing_username = (
+        db.query(User)
+        .filter(
+            User.username == data.username,
+            User.id != user.id,
+        )
+        .first()
+    )
+
+    if existing_username:
+        raise ValueError(
+            "Username already taken"
+        )
+
+    existing_email = (
+        db.query(User)
+        .filter(
+            User.email == data.email,
+            User.id != user.id,
+        )
+        .first()
+    )
+
+    if existing_email:
+        raise ValueError(
+            "Email already registered"
+        )
+
+    user.username = data.username
+    user.email = data.email
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+def change_password(
+    db: Session,
+    user: User,
+    current_password: str,
+    new_password: str,
+):
+    if not verify_password(
+        current_password,
+        user.hashed_password,
+    ):
+        raise ValueError(
+            "Current password is incorrect"
+        )
+
+    user.hashed_password = hash_password(
+        new_password
+    )
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        "message": "Password changed successfully"
     }

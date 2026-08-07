@@ -1,4 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  projectSchema,
+  type ProjectFormData,
+} from "@/lib/validators/project";
+
+import { toast } from "sonner";
 import {
   useMutation,
   useQueryClient,
@@ -43,61 +52,82 @@ export default function ProjectDialog({
   project,
 }: Props) {
   const queryClient = useQueryClient();
+  const {
+  register,
+  handleSubmit,
+  reset,
+  formState: { errors },
+} = useForm<ProjectFormData>({
+  resolver: zodResolver(projectSchema),
+  defaultValues: {
+    title: "",
+    description: "",
+  },
+});
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] =
-    useState("");
+useEffect(() => {
+  if (!open) return;
 
-  useEffect(() => {
-    if (!open) return;
+  if (mode === "edit" && project) {
+    reset({
+      title: project.title,
+      description: project.description ?? "",
+    });
+  } else {
+    reset({
+      title: "",
+      description: "",
+    });
+  }
+}, [open, mode, project, reset]);
 
-    if (mode === "edit" && project) {
-      setTitle(project.title);
-      setDescription(project.description ?? "");
-    } else {
-      setTitle("");
-      setDescription("");
+const mutation = useMutation({
+  mutationFn: async (data: ProjectFormData) => {
+    if (mode === "create") {
+      return createProject({
+        title: data.title,
+        description: data.description,
+      });
     }
-  }, [open, mode, project]);
 
-  const mutation = useMutation({
-    mutationFn: async () => {
-      if (mode === "create") {
-        return createProject({
-          title,
-          description,
-        });
-      }
+    return updateProject(project!.id, {
+      title: data.title,
+      description: data.description,
+    });
+  },
 
-      return updateProject(project!.id, {
-        title,
-        description,
-      });
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["projects"],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["dashboard"],
-      });
-
-      setTitle("");
-      setDescription("");
-
-      onOpenChange(false);
-    },
+onSuccess: () => {
+  queryClient.invalidateQueries({
+    queryKey: ["projects"],
   });
 
-  function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ) {
-    e.preventDefault();
+  queryClient.invalidateQueries({
+    queryKey: ["dashboard"],
+  });
 
-    mutation.mutate();
-  }
+  toast.success(
+    mode === "create"
+      ? "Project created successfully."
+      : "Project updated successfully."
+  );
+
+  onOpenChange(false);
+},
+
+onError: () => {
+  toast.error(
+    mode === "create"
+      ? "Failed to create project."
+      : "Failed to update project."
+  );
+},
+  });
+
+function onSubmit(
+  data: ProjectFormData
+) {
+  mutation.mutate(data);
+}
 
   return (
     <Dialog
@@ -113,8 +143,8 @@ export default function ProjectDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit}
+<form
+  onSubmit={handleSubmit(onSubmit)}
           className="space-y-5"
         >
           <div className="space-y-2">
@@ -122,15 +152,17 @@ export default function ProjectDialog({
               Project Title
             </Label>
 
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) =>
-                setTitle(e.target.value)
-              }
-              placeholder="DevTrack"
-              required
-            />
+<Input
+  id="title"
+  placeholder="DevTrack"
+  {...register("title")}
+/>
+
+{errors.title && (
+  <p className="text-sm text-red-500">
+    {errors.title.message}
+  </p>
+)}
           </div>
 
           <div className="space-y-2">
@@ -138,14 +170,17 @@ export default function ProjectDialog({
               Description
             </Label>
 
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
-              placeholder="Describe your project..."
-            />
+<Textarea
+  id="description"
+  placeholder="Describe your project..."
+  {...register("description")}
+/>
+
+{errors.description && (
+  <p className="text-sm text-red-500">
+    {errors.description.message}
+  </p>
+)}
           </div>
 
           <DialogFooter>

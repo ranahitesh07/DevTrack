@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import {
   FolderKanban,
   CheckSquare,
@@ -20,15 +21,9 @@ export default function Dashboard() {
     queryFn: getDashboardStats,
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <h2 className="text-xl font-semibold">
-          Loading dashboard...
-        </h2>
-      </div>
-    );
-  }
+if (isLoading) {
+  return <DashboardSkeleton />;
+}
 
   if (isError) {
     return (
@@ -90,12 +85,16 @@ export default function Dashboard() {
           color="bg-cyan-600"
         />
 
-        <StatCard
-          title="Completion"
-          value={`${data?.completion_percentage ?? 0}%`}
-          icon={TrendingUp}
-          color="bg-emerald-600"
-        />
+<StatCard
+  title="Completion"
+  value={`${data?.completion_percentage ?? 0}%`}
+  icon={TrendingUp}
+  color="bg-emerald-600"
+  progress={data?.completion_percentage ?? 0}
+footer={`${data?.completed_tasks ?? 0} of ${
+  data?.total_tasks ?? 0
+} Tasks Completed`}
+/>
       </div>
 
       {/* Recent Projects & Upcoming Tasks */}

@@ -1,4 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import {
+  taskSchema,
+  type TaskFormData,
+} from "@/lib/validators/task";
+
+import { toast } from "sonner";
 import {
   useMutation,
   useQuery,
@@ -62,82 +71,110 @@ export default function TaskDialog({
   task,
 }: Props) {
   const queryClient = useQueryClient();
+  const {
+  register,
+  handleSubmit,
+  reset,
+  watch,
+  setValue,
+  formState: { errors },
+} = useForm<TaskFormData>({
+  resolver: zodResolver(taskSchema),
+
+  defaultValues: {
+    project_id: "",
+    title: "",
+    description: "",
+    priority: "Medium",
+    status: "Todo",
+  },
+});
 
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: getProjects,
   });
 
-  const [projectId, setProjectId] =
-    useState("");
+useEffect(() => {
+  if (!open) return;
 
-  const [title, setTitle] =
-    useState("");
-
-  const [description, setDescription] =
-    useState("");
-
-  const [priority, setPriority] =
-    useState<
-      "Low" | "Medium" | "High"
-    >("Medium");
-
-  useEffect(() => {
-    if (!open) return;
-
-    if (mode === "edit" && task) {
-      setProjectId(task.project_id);
-      setTitle(task.title);
-      setDescription(
-        task.description ?? ""
-      );
-      setPriority(task.priority);
-    } else {
-      setProjectId("");
-      setTitle("");
-      setDescription("");
-      setPriority("Medium");
-    }
-  }, [open, mode, task]);
-
-  const mutation = useMutation({
-    mutationFn: async () => {
-      if (mode === "create") {
-        return createTask({
-          project_id: projectId,
-          title,
-          description,
-          priority,
-        });
-      }
-
-      return updateTask(task!.id, {
-        title,
-        description,
-        priority,
-      });
-    },
-
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["tasks"],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["dashboard"],
-      });
-
-      onOpenChange(false);
-    },
-  });
-
-  function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
-  ) {
-    e.preventDefault();
-
-    mutation.mutate();
+  if (mode === "edit" && task) {
+    reset({
+      project_id: task.project_id,
+      title: task.title,
+      description: task.description ?? "",
+      priority: task.priority,
+      status: task.status,
+    });
+  } else {
+    reset({
+      project_id: "",
+      title: "",
+      description: "",
+      priority: "Medium",
+      status: "Todo",
+    });
   }
+}, [open, mode, task, reset]);
+
+const projectId = watch("project_id");
+const priority = watch("priority");
+const status = watch("status");
+
+const mutation = useMutation({
+  mutationFn: async (
+  data: TaskFormData
+) => {
+if (mode === "create") {
+  return createTask({
+    project_id: data.project_id,
+    title: data.title,
+    description: data.description,
+    priority: data.priority,
+    status: data.status,
+  });
+}
+
+return updateTask(task!.id, {
+  title: data.title,
+  description: data.description,
+  priority: data.priority,
+  status: data.status,
+});
+  },
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ["tasks"],
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: ["dashboard"],
+    });
+
+    onOpenChange(false);
+
+    toast.success(
+      mode === "create"
+        ? "Task created successfully."
+        : "Task updated successfully."
+    );
+  },
+
+  onError: () => {
+    toast.error(
+      mode === "create"
+        ? "Failed to create task."
+        : "Failed to update task."
+    );
+  },
+});
+
+function onSubmit(
+  data: TaskFormData
+) {
+  mutation.mutate(data);
+}
 
   return (
     <Dialog
@@ -154,99 +191,131 @@ export default function TaskDialog({
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="space-y-5"
         >
-          <div className="space-y-2">
-            <Label>Project</Label>
+<div className="space-y-2">
+  <Label>Project</Label>
 
-            <Select
-              value={projectId}
-              onValueChange={
-                setProjectId
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Project" />
-              </SelectTrigger>
+  <Select
+    value={projectId}
+    onValueChange={(value) =>
+      setValue("project_id", value)
+    }
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select Project" />
+    </SelectTrigger>
 
-              <SelectContent>
-                {projects.map(
-                  (project: Project) => (
-                    <SelectItem
-                      key={project.id}
-                      value={project.id}
-                    >
-                      {project.title}
-                    </SelectItem>
-                  )
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+    <SelectContent>
+      {projects.map((project: Project) => (
+        <SelectItem
+          key={project.id}
+          value={project.id}
+        >
+          {project.title}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
 
-          <div className="space-y-2">
-            <Label>Task Title</Label>
+  {errors.project_id && (
+    <p className="text-sm text-red-500">
+      {errors.project_id.message}
+    </p>
+  )}
+</div>
 
-            <Input
-              value={title}
-              onChange={(e) =>
-                setTitle(
-                  e.target.value
-                )
-              }
-              placeholder="Implement Login"
-              required
-            />
-          </div>
+<div className="space-y-2">
+  <Label>Task Title</Label>
 
-          <div className="space-y-2">
-            <Label>Description</Label>
+  <Input
+    placeholder="Implement Login"
+    {...register("title")}
+  />
 
-            <Textarea
-              value={description}
-              onChange={(e) =>
-                setDescription(
-                  e.target.value
-                )
-              }
-              placeholder="Describe this task..."
-            />
-          </div>
+  {errors.title && (
+    <p className="text-sm text-red-500">
+      {errors.title.message}
+    </p>
+  )}
+</div>
 
-          <div className="space-y-2">
-            <Label>Priority</Label>
+<div className="space-y-2">
+  <Label>Description</Label>
 
-            <Select
-              value={priority}
-              onValueChange={(value) =>
-                setPriority(
-                  value as
-                    | "Low"
-                    | "Medium"
-                    | "High"
-                )
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+  <Textarea
+    placeholder="Describe this task..."
+    {...register("description")}
+  />
+</div>
 
-              <SelectContent>
-                <SelectItem value="Low">
-                  Low
-                </SelectItem>
+<div className="space-y-2">
+  <Label>Priority</Label>
 
-                <SelectItem value="Medium">
-                  Medium
-                </SelectItem>
+  <Select
+    value={priority}
+    onValueChange={(value) =>
+      setValue(
+        "priority",
+        value as "Low" | "Medium" | "High"
+      )
+    }
+  >
+    <SelectTrigger>
+      <SelectValue />
+    </SelectTrigger>
 
-                <SelectItem value="High">
-                  High
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+    <SelectContent>
+      <SelectItem value="Low">
+        Low
+      </SelectItem>
+
+      <SelectItem value="Medium">
+        Medium
+      </SelectItem>
+
+      <SelectItem value="High">
+        High
+      </SelectItem>
+    </SelectContent>
+  </Select>
+</div>
+          
+<div className="space-y-2">
+  <Label>Status</Label>
+
+  <Select
+    value={status}
+    onValueChange={(value) =>
+      setValue(
+        "status",
+        value as
+          | "Todo"
+          | "In Progress"
+          | "Completed"
+      )
+    }
+  >
+    <SelectTrigger>
+      <SelectValue />
+    </SelectTrigger>
+
+    <SelectContent>
+      <SelectItem value="Todo">
+        Todo
+      </SelectItem>
+
+      <SelectItem value="In Progress">
+        In Progress
+      </SelectItem>
+
+      <SelectItem value="Completed">
+        Completed
+      </SelectItem>
+    </SelectContent>
+  </Select>
+</div>
 
           <DialogFooter>
             <Button

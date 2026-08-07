@@ -4,6 +4,7 @@ export interface TaskCreate {
   project_id: string;
   title: string;
   description?: string;
+  status?: "Todo" | "In Progress" | "Completed";
   priority?: "Low" | "Medium" | "High";
   due_date?: string | null;
 }
@@ -21,8 +22,14 @@ export async function getTasks() {
   return response.data;
 }
 
-export async function createTask(task: TaskCreate) {
-  const response = await api.post("/tasks", task);
+export async function createTask(
+  task: TaskCreate
+) {
+  const response = await api.post(
+    "/tasks",
+    task
+  );
+
   return response.data;
 }
 

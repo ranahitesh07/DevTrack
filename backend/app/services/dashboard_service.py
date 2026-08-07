@@ -1,4 +1,3 @@
-from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.project import Project
@@ -66,7 +65,7 @@ def get_dashboard(
         .join(Project)
         .filter(
             Project.user_id == user.id,
-            Task.status == "Done",
+            Task.status == "Completed",
         )
         .count()
     )
@@ -83,7 +82,7 @@ def get_dashboard(
 
     completion_percentage = (
         round((completed_tasks / total_tasks) * 100, 2)
-        if total_tasks
+        if total_tasks > 0
         else 0
     )
 
@@ -97,4 +96,6 @@ def get_dashboard(
         "completed_tasks": completed_tasks,
         "high_priority_tasks": high_priority_tasks,
         "completion_percentage": completion_percentage,
+        "tasks_completed": completed_tasks,
+        "tasks_remaining": total_tasks - completed_tasks,
     }
