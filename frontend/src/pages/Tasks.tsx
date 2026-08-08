@@ -68,11 +68,11 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`rounded-xl border p-4 transition ${
-        isOver
-          ? "bg-blue-50"
-          : "bg-slate-50"
-      }`}
+      className={`min-h-[180px] rounded-xl border p-4 transition ${
+  isOver
+    ? "border-blue-400 bg-blue-50"
+    : "bg-slate-50"
+}`}
     >
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-semibold">
@@ -104,6 +104,7 @@ function KanbanTaskCard({
   const style = transform
     ? {
         transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+        zIndex: 10,
       }
     : undefined;
 
@@ -544,7 +545,7 @@ if (isLoading) {
 <DndContext
   onDragEnd={handleDragEnd}
 >
-  <div className="grid gap-5 md:grid-cols-3">
+  <div className="grid gap-5 lg:grid-cols-3">
     {(
       [
         "Todo",
