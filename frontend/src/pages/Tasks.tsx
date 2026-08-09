@@ -12,6 +12,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import type {
+  DragEndEvent,
+} from "@dnd-kit/core";
+
 import {
   Select,
   SelectContent,
@@ -29,7 +33,6 @@ import {
 import {
   Plus,
   Search,
-  Filter,
   Pencil,
   Trash2,
   List,
@@ -145,19 +148,22 @@ function KanbanTaskCard({
 export default function Tasks() {
   const queryClient = useQueryClient();
 
-  async function handleDragEnd({
-  active,
-  over,
-}: {
-  active: { id: string };
-  over: { id: string } | null;
-}) {
+  async function handleDragEnd(
+  event: DragEndEvent
+) {
+  const {
+    active,
+    over,
+  } = event;
+
   if (!over) return;
 
-  const taskId = String(active.id);
+  const taskId = String(
+    active.id
+  );
 
   const newStatus =
-    over.id as
+    String(over.id) as
       | "Todo"
       | "In Progress"
       | "Completed";
@@ -387,7 +393,11 @@ if (isLoading) {
 
   <Select
     value={statusFilter}
-    onValueChange={setStatusFilter}
+    onValueChange={(value) =>
+  setStatusFilter(
+    value ?? "All"
+  )
+}
   >
     <SelectTrigger className="w-44">
       <SelectValue placeholder="Status" />
@@ -414,7 +424,11 @@ if (isLoading) {
 
   <Select
     value={priorityFilter}
-    onValueChange={setPriorityFilter}
+    onValueChange={(value) =>
+  setPriorityFilter(
+    value ?? "All"
+  )
+}
   >
     <SelectTrigger className="w-44">
       <SelectValue placeholder="Priority" />

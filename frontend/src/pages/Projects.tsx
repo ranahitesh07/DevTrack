@@ -193,7 +193,11 @@ if (isLoading) {
 
         <Select
           value={statusFilter}
-          onValueChange={setStatusFilter}
+          onValueChange={(value) =>
+  setStatusFilter(
+    value ?? "All"
+  )
+}
         >
           <SelectTrigger className="w-48">
             <div className="flex items-center gap-2">

@@ -199,9 +199,14 @@ function onSubmit(
 
   <Select
     value={projectId}
-    onValueChange={(value) =>
-      setValue("project_id", value)
-    }
+    onValueChange={(value) => {
+  if (value) {
+    setValue(
+      "project_id",
+      value
+    );
+  }
+}}
   >
     <SelectTrigger>
       <SelectValue placeholder="Select Project" />
