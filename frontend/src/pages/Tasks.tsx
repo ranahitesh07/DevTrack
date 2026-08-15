@@ -68,21 +68,56 @@ function KanbanColumn({
     id: status,
   });
 
+  const columnStyles = {
+    Todo: {
+      wrapper:
+        "border-slate-200 bg-slate-50",
+      dot: "bg-slate-400",
+    },
+    "In Progress": {
+      wrapper:
+        "border-blue-100 bg-blue-50/40",
+      dot: "bg-blue-500",
+    },
+    Completed: {
+      wrapper:
+        "border-emerald-100 bg-emerald-50/40",
+      dot: "bg-emerald-500",
+    },
+  };
+
+  const style = columnStyles[status];
+
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[180px] rounded-xl border p-4 transition-all duration-200 ${
-  isOver
-    ? "border-blue-300 bg-blue-50/70"
-    : "border-slate-200 bg-slate-50"
-}`}
+      className={`
+        min-h-[240px]
+        rounded-xl
+        border
+        p-4
+        transition-all
+        duration-200
+        ${style.wrapper}
+        ${
+          isOver
+            ? "ring-2 ring-blue-200"
+            : ""
+        }
+      `}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="font-semibold">
+      {/* Column Header */}
+      <div className="mb-5 flex items-center gap-2">
+        <span
+          className={`h-3 w-3 rounded-full ${style.dot}`}
+        />
+
+        <h2 className="font-semibold text-slate-900">
           {status}
         </h2>
       </div>
 
+      {/* Tasks */}
       <div className="space-y-3">
         {children}
       </div>
@@ -118,14 +153,22 @@ function KanbanTaskCard({
       {...listeners}
       {...attributes}
       className="
-  cursor-grab rounded-lg border border-slate-200 bg-white p-4
-  shadow-sm
-  transition-all duration-200 ease-out
-  hover:-translate-y-0.5 hover:shadow-md
-  active:cursor-grabbing
-"
+        cursor-grab
+        rounded-xl
+        border
+        border-slate-200
+        bg-white
+        p-5
+        shadow-sm
+        transition-all
+        duration-200
+        ease-out
+        hover:-translate-y-0.5
+        hover:shadow-md
+        active:cursor-grabbing
+      "
     >
-      <h3 className="font-semibold">
+      <h3 className="font-semibold text-slate-900">
         {task.title}
       </h3>
 
@@ -136,12 +179,13 @@ function KanbanTaskCard({
 
       <div className="mt-3 flex gap-2">
         <Badge
+          variant="outline"
           className={
             task.priority === "High"
-              ? "bg-red-600 hover:bg-red-600"
+              ? "border-red-200 bg-red-50 text-red-700"
               : task.priority === "Medium"
-              ? "bg-yellow-500 hover:bg-yellow-500"
-              : "bg-green-600 hover:bg-green-600"
+              ? "border-amber-200 bg-amber-50 text-amber-700"
+              : "border-emerald-200 bg-emerald-50 text-emerald-700"
           }
         >
           {task.priority}
@@ -597,10 +641,10 @@ if (isLoading) {
           )}
 
           {statusTasks.length === 0 && (
-            <div className="rounded-lg border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-400">
-              No tasks
-            </div>
-          )}
+  <div className="rounded-lg border border-dashed border-slate-200 bg-white p-10 text-center text-sm text-slate-400">
+    No tasks
+  </div>
+)}
         </KanbanColumn>
       );
     })}
