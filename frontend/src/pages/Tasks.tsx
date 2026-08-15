@@ -71,10 +71,10 @@ function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-[180px] rounded-xl border p-4 transition ${
+      className={`min-h-[180px] rounded-xl border p-4 transition-all duration-200 ${
   isOver
-    ? "border-blue-400 bg-blue-50"
-    : "bg-slate-50"
+    ? "border-blue-300 bg-blue-50/70"
+    : "border-slate-200 bg-slate-50"
 }`}
     >
       <div className="mb-4 flex items-center justify-between">
@@ -117,7 +117,13 @@ function KanbanTaskCard({
       style={style}
       {...listeners}
       {...attributes}
-      className="cursor-grab rounded-lg border bg-white p-4 shadow-sm hover:shadow-md active:cursor-grabbing"
+      className="
+  cursor-grab rounded-lg border border-slate-200 bg-white p-4
+  shadow-sm
+  transition-all duration-200 ease-out
+  hover:-translate-y-0.5 hover:shadow-md
+  active:cursor-grabbing
+"
     >
       <h3 className="font-semibold">
         {task.title}
@@ -324,13 +330,13 @@ if (isLoading) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold">
-            Tasks
-          </h1>
+<h1 className="text-4xl font-bold tracking-tight text-slate-900">
+  Tasks
+</h1>
 
-          <p className="mt-2 text-slate-500">
-            Manage your project tasks.
-          </p>
+<p className="mt-2 max-w-2xl text-slate-500">
+  Organize your work and keep projects moving forward.
+</p>
         </div>
 
 <div className="flex items-center gap-3">
@@ -377,8 +383,8 @@ if (isLoading) {
       </div>
 
 {/* Search + Filters */}
-<div className="flex flex-wrap gap-4">
-  <div className="relative flex-1 min-w-[250px]">
+<div className="flex flex-col gap-3 sm:flex-row">
+  <div className="relative min-w-0 flex-1">
     <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
 
     <Input
@@ -399,7 +405,7 @@ if (isLoading) {
   )
 }
   >
-    <SelectTrigger className="w-44">
+    <SelectTrigger className="w-full sm:w-44">
       <SelectValue placeholder="Status" />
     </SelectTrigger>
 
@@ -430,7 +436,7 @@ if (isLoading) {
   )
 }
   >
-    <SelectTrigger className="w-44">
+    <SelectTrigger className="w-full sm:w-44">
       <SelectValue placeholder="Priority" />
     </SelectTrigger>
 
@@ -480,7 +486,12 @@ if (isLoading) {
             (task: Task) => (
               <div
                 key={task.id}
-                className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
+                className="
+  rounded-xl border border-slate-200 bg-white p-5
+  shadow-sm
+  transition-all duration-200 ease-out
+  hover:-translate-y-0.5 hover:shadow-md
+"
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -495,32 +506,30 @@ if (isLoading) {
 
                     <div className="mt-3 flex gap-2">
                       <Badge
-                        className={
-                          task.priority ===
-                          "High"
-                            ? "bg-red-600 hover:bg-red-600"
-                            : task.priority ===
-                              "Medium"
-                            ? "bg-yellow-500 hover:bg-yellow-500"
-                            : "bg-green-600 hover:bg-green-600"
-                        }
-                      >
-                        {task.priority}
-                      </Badge>
+  variant="outline"
+  className={
+    task.priority === "High"
+      ? "border-red-200 bg-red-50 text-red-700"
+      : task.priority === "Medium"
+      ? "border-amber-200 bg-amber-50 text-amber-700"
+      : "border-emerald-200 bg-emerald-50 text-emerald-700"
+  }
+>
+  {task.priority}
+</Badge>
 
                       <Badge
-                        className={
-                          task.status ===
-                          "Completed"
-                            ? "bg-green-600 hover:bg-green-600"
-                            : task.status ===
-                              "In Progress"
-                            ? "bg-blue-600 hover:bg-blue-600"
-                            : "bg-slate-600 hover:bg-slate-600"
-                        }
-                      >
-                        {task.status}
-                      </Badge>
+  variant="outline"
+  className={
+    task.status === "Completed"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : task.status === "In Progress"
+      ? "border-blue-200 bg-blue-50 text-blue-700"
+      : "border-slate-200 bg-slate-50 text-slate-700"
+  }
+>
+  {task.status}
+</Badge>
                     </div>
                   </div>
 
@@ -588,7 +597,7 @@ if (isLoading) {
           )}
 
           {statusTasks.length === 0 && (
-            <div className="rounded-lg border border-dashed bg-white p-8 text-center text-sm text-slate-400">
+            <div className="rounded-lg border border-dashed border-slate-200 bg-white p-8 text-center text-sm text-slate-400">
               No tasks
             </div>
           )}

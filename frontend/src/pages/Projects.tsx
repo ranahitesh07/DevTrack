@@ -158,13 +158,13 @@ if (isLoading) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold">
-            Projects
-          </h1>
+<h1 className="text-4xl font-bold tracking-tight text-slate-900">
+  Projects
+</h1>
 
-          <p className="mt-2 text-slate-500">
-            Manage all your development projects.
-          </p>
+<p className="mt-2 max-w-2xl text-slate-500">
+  Organize and track your development projects.
+</p>
         </div>
 
         <Button
@@ -177,7 +177,7 @@ if (isLoading) {
       </div>
 
       {/* Search + Filter */}
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
 
@@ -199,7 +199,7 @@ if (isLoading) {
   )
 }
         >
-          <SelectTrigger className="w-48">
+          <SelectTrigger className="w-full sm:w-48">
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4" />
               <SelectValue />
@@ -252,25 +252,31 @@ if (isLoading) {
             (project: Project) => (
               <div
                 key={project.id}
-                className="rounded-xl border bg-white p-6 shadow-sm transition hover:shadow-md"
+                className="
+  rounded-xl border border-slate-200 bg-white p-6
+  shadow-sm
+  transition-all duration-200 ease-out
+  hover:-translate-y-0.5 hover:shadow-md
+"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold">
+                    <h2 className="text-lg font-semibold tracking-tight text-slate-900">
                       {project.title}
                     </h2>
 
-                    <p className="mt-3 text-sm text-slate-500">
+                    <p className="mt-3 min-h-10 text-sm leading-6 text-slate-500">
                       {project.description ||
                         "No description"}
                     </p>
                   </div>
 
 <Badge
+  variant="outline"
   className={
     project.status === "Completed"
-      ? "bg-green-600 hover:bg-green-600"
-      : "bg-blue-600 hover:bg-blue-600"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+      : "border-blue-200 bg-blue-50 text-blue-700"
   }
 >
   {project.status}
@@ -279,26 +285,22 @@ if (isLoading) {
 
                 <div className="mt-6 flex gap-3">
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleEdit(project)
-                    }
-                  >
+  variant="outline"
+  size="sm"
+  className="cursor-pointer"
+  onClick={() => handleEdit(project)}
+>
                     <Pencil className="mr-2 h-4 w-4" />
                     Edit
                   </Button>
 
                   <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() =>
-                      handleDelete(project.id)
-                    }
-                    disabled={
-                      deleteMutation.isPending
-                    }
-                  >
+  variant="destructive"
+  size="sm"
+  className="cursor-pointer"
+  onClick={() => handleDelete(project.id)}
+  disabled={deleteMutation.isPending}
+>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete
                   </Button>
