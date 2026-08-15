@@ -50,50 +50,50 @@ if (isLoading) {
 
       {/* Statistics Cards */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <StatCard
-          title="Projects"
-          value={data?.total_projects ?? 0}
-          icon={FolderKanban}
-          color="bg-blue-600"
-        />
+<StatCard
+  title="Projects"
+  value={data?.total_projects ?? 0}
+  icon={FolderKanban}
+  color="bg-slate-100 text-slate-700"
+/>
 
-        <StatCard
-          title="Tasks"
-          value={data?.total_tasks ?? 0}
-          icon={CheckSquare}
-          color="bg-violet-600"
-        />
+<StatCard
+  title="Tasks"
+  value={data?.total_tasks ?? 0}
+  icon={CheckSquare}
+  color="bg-slate-100 text-slate-700"
+/>
 
-        <StatCard
-          title="Completed"
-          value={data?.completed_tasks ?? 0}
-          icon={CircleCheckBig}
-          color="bg-green-600"
-        />
+<StatCard
+  title="Completed"
+  value={data?.completed_tasks ?? 0}
+  icon={CircleCheckBig}
+  color="bg-emerald-50 text-emerald-600"
+/>
 
-        <StatCard
-          title="In Progress"
-          value={data?.in_progress_tasks ?? 0}
-          icon={Clock}
-          color="bg-orange-500"
-        />
+<StatCard
+  title="In Progress"
+  value={data?.in_progress_tasks ?? 0}
+  icon={Clock}
+  color="bg-amber-50 text-amber-600"
+/>
 
-        <StatCard
-          title="Active Projects"
-          value={data?.active_projects ?? 0}
-          icon={Activity}
-          color="bg-cyan-600"
-        />
+<StatCard
+  title="Active Projects"
+  value={data?.active_projects ?? 0}
+  icon={Activity}
+  color="bg-slate-100 text-slate-700"
+/>
 
 <StatCard
   title="Completion"
   value={`${data?.completion_percentage ?? 0}%`}
   icon={TrendingUp}
-  color="bg-emerald-600"
+  color="bg-emerald-50 text-emerald-600"
   progress={data?.completion_percentage ?? 0}
-footer={`${data?.completed_tasks ?? 0} of ${
-  data?.total_tasks ?? 0
-} Tasks Completed`}
+  footer={`${data?.completed_tasks ?? 0} of ${
+    data?.total_tasks ?? 0
+  } Tasks Completed`}
 />
       </div>
 

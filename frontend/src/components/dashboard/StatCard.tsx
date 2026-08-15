@@ -21,14 +21,21 @@ export default function StatCard({
   footer,
 }: StatCardProps) {
   return (
-    <div className="rounded-xl border bg-white p-6 shadow-sm">
+    <div
+      className="
+        rounded-xl border border-slate-200 bg-white p-5
+        shadow-sm
+        transition-all duration-200 ease-out
+        hover:-translate-y-0.5 hover:shadow-md
+      "
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm font-medium text-slate-500">
             {title}
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">
+          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             {value}
           </h2>
 
@@ -46,9 +53,9 @@ export default function StatCard({
         </div>
 
         <div
-          className={`rounded-xl p-4 ${color}`}
+          className={`flex h-11 w-11 items-center justify-center rounded-lg ${color}`}
         >
-          <Icon className="h-7 w-7 text-white" />
+          <Icon className="h-5 w-5" />
         </div>
       </div>
     </div>
