@@ -270,7 +270,7 @@ FastAPI automatically generates interactive API documentation:
 - Swagger UI: `https://devtrack-backend-rnde.onrender.com/docs`
 - ReDoc: `https://devtrack-backend-rnde.onrender.com/redoc`
 
-In production, these are available at: **[[API Documentation URL](https://devtrack-backend-rnde.onrender.com/docs)]**
+In production, these are available at: **[API Documentation URL(https://devtrack-backend-rnde.onrender.com/docs)]**
 
 ---
 
