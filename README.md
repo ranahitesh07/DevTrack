@@ -267,8 +267,8 @@ docker compose up --build
 
 FastAPI automatically generates interactive API documentation:
 
-- Swagger UI: `/docs`
-- ReDoc: `/redoc`
+- Swagger UI: `https://devtrack-backend-rnde.onrender.com/docs`
+- ReDoc: `https://devtrack-backend-rnde.onrender.com/redoc`
 
 In production, these are available at: **[API Documentation URL]**
 
